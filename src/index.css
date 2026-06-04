@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #fff;
+  color: #1a1a2e;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+/* ── Tiptap rich editor content styles ─────────────── */
+.rich-editor-content {
+  line-height: 1.6;
+}
+.rich-editor-content p {
+  margin: 0 0 0.5em;
+}
+.rich-editor-content p:last-child {
+  margin-bottom: 0;
+}
+.rich-editor-content strong {
+  font-weight: 700;
+}
+.rich-editor-content em {
+  font-style: italic;
+}
+.rich-editor-content u {
+  text-decoration: underline;
+}
+.rich-editor-content s {
+  text-decoration: line-through;
+}
+.rich-editor-content code {
+  font-family: ui-monospace, monospace;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.875em;
+  color: #1f2937;
+}
+.rich-editor-content a {
+  color: #4361ee;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.rich-editor-content a:hover {
+  color: #3451d1;
+}
+.rich-editor-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5em 0;
+}
+.rich-editor-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5em 0;
+}
+.rich-editor-content li {
+  margin: 0.2em 0;
+}
+.rich-editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 0.5em 0;
+}
+.rich-editor-content h1 { font-size: 1.5em; font-weight: 700; margin: 0.5em 0; }
+.rich-editor-content h2 { font-size: 1.25em; font-weight: 700; margin: 0.5em 0; }
+.rich-editor-content h3 { font-size: 1.1em;  font-weight: 600; margin: 0.5em 0; }
+
+/* ProseMirror focus ring */
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* ── react-multi-select-component overrides ──────────── */
+.rmsc {
+  --rmsc-main:    #4361EE;
+  --rmsc-hover:   #EEF1FD;
+  --rmsc-border:  #d1d5db;
+  --rmsc-gray:    #9ca3af;
+  --rmsc-bg:      #fff;
+  --rmsc-p:       10px;
+  --rmsc-radius:  8px;
+  --rmsc-h:       42px;
+  font-size: 14px;
+}
+.rmsc .dropdown-container {
+  border-radius: 8px !important;
+  border-color: #d1d5db !important;
+}
+.rmsc .dropdown-container:focus-within {
+  border-color: #4361EE !important;
+  box-shadow: 0 0 0 3px rgba(67,97,238,0.15) !important;
+}
+.rmsc .dropdown-content {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  border-color: #e5e7eb !important;
+  z-index: 9999 !important;
+}
+.rmsc .search input {
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+.rmsc .item-renderer input[type='checkbox'] {
+  accent-color: #4361EE;
+  width: 15px;
+  height: 15px;
+}
+.rmsc .dropdown-heading-value {
+  overflow: hidden;
+}
+.rmsc .dropdown-heading-value span {
+  color: #374151;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rmsc-error .dropdown-container {
+  border-color: #f87171 !important;
+}

@@ -204,10 +204,8 @@ export const QuestionCreationPage: React.FC = () => {
   /* clear messages when component unmounts */
   useEffect(() => () => { dispatch(clearApiMessages()); }, [dispatch]);
 
-  const currentQ  = questions[currentQuestionIndex];
-  const totalQ    = parseInt(testConfig.noOfQuestions) || questions.length;
-  const maxQ      = parseInt(testConfig.noOfQuestions) || 0;
-  const atLimit   = maxQ > 0 && questions.length >= maxQ;
+  const currentQ = questions[currentQuestionIndex];
+  const totalQ   = parseInt(testConfig.noOfQuestions) || questions.length;
 
   const updateField = <K extends keyof typeof currentQ>(key: K, val: (typeof currentQ)[K]) =>
     dispatch(updateQuestion({ index: currentQuestionIndex, data: { [key]: val } }));
@@ -275,22 +273,8 @@ export const QuestionCreationPage: React.FC = () => {
           mediaUrl: row['media_url'] ?? row['mediaurl'] ?? '',
         });
       }
-      let finalRows = parsed;
-      if (maxQ > 0) {
-        const remaining = maxQ - questions.length;
-        if (remaining <= 0) {
-          setCsvError(`Question limit reached. This test allows a maximum of ${maxQ} questions.`);
-          setCsvRows([]);
-          setShowCsvModal(true);
-          return;
-        }
-        if (parsed.length > remaining) {
-          finalRows = parsed.slice(0, remaining);
-          errs.unshift(`${parsed.length - remaining} question(s) skipped — only ${remaining} slot(s) remaining (max: ${maxQ}).`);
-        }
-      }
       setCsvError(errs.length ? errs.join('; ') : '');
-      setCsvRows(finalRows);
+      setCsvRows(parsed);
       setShowCsvModal(true);
     };
     reader.readAsText(file);
@@ -405,9 +389,7 @@ export const QuestionCreationPage: React.FC = () => {
 
           <p className="px-3 pt-3 pb-2 text-[11px] text-gray-400 whitespace-nowrap min-w-[160px]">
             Total Questions .&nbsp;
-            <span className={`font-semibold ${atLimit ? 'text-amber-600' : 'text-gray-600'}`}>
-              {maxQ > 0 ? `${questions.length} / ${maxQ}` : questions.length}
-            </span>
+            <span className="font-semibold text-gray-600">{testConfig.noOfQuestions || questions.length}</span>
           </p>
 
           {/* question list */}
@@ -542,9 +524,7 @@ export const QuestionCreationPage: React.FC = () => {
                 </h2>
                 <div className="flex items-center gap-2">
                   <Button variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs"
-                    onClick={() => dispatch(addQuestion())}
-                    disabled={atLimit}
-                    title={atLimit ? `Maximum ${maxQ} questions reached` : undefined}>
+                    onClick={() => dispatch(addQuestion())}>
                     <Plus size={12} /> MCQ
                   </Button>
                   <Button variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs"
@@ -747,19 +727,13 @@ export const QuestionCreationPage: React.FC = () => {
               )}
 
               {/* ── Add another question ── */}
-              {!atLimit ? (
-                <button
-                  type="button"
-                  onClick={() => dispatch(addQuestion())}
-                  className="mt-4 flex items-center gap-1.5 text-sm text-[#4361EE] hover:underline"
-                >
-                  <Plus size={14} /> Add Another Question
-                </button>
-              ) : (
-                <p className="mt-4 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                  Maximum of {maxQ} questions reached for this test.
-                </p>
-              )}
+              <button
+                type="button"
+                onClick={() => dispatch(addQuestion())}
+                className="mt-4 flex items-center gap-1.5 text-sm text-[#4361EE] hover:underline"
+              >
+                <Plus size={14} /> Add Another Question
+              </button>
 
               {/* ── Footer actions ── */}
               <div className="flex items-center justify-between mt-6 pb-8">

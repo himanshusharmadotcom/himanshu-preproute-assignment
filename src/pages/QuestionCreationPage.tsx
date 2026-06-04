@@ -149,8 +149,8 @@ export const QuestionCreationPage: React.FC = () => {
           ?? subjectsList.find((s) => s.id === rawSubject)?.id
           ?? subjectsList.find((s) => s.name.toLowerCase() === rawSubject.toLowerCase())?.id
           ?? rawSubject;
-        const topicIds    = (testRes.data.topic_ids    ?? testRes.data.topics)    ?? [];
-        const subTopicIds = (testRes.data.sub_topic_ids ?? testRes.data.sub_topics) ?? [];
+        const rawTopicIds    = ((testRes.data.topic_ids    ?? testRes.data.topics)    ?? []).filter(Boolean);
+        const rawSubTopicIds = ((testRes.data.sub_topic_ids ?? testRes.data.sub_topics) ?? []).filter(Boolean);
 
         // Fetch topics/subtopics and capture their payloads so we can derive display names
         let topicsList: ApiTopic[] = [];
@@ -159,10 +159,21 @@ export const QuestionCreationPage: React.FC = () => {
           const topicsAction = await dispatch(fetchTopics(subjectId));
           if (fetchTopics.fulfilled.match(topicsAction)) topicsList = topicsAction.payload;
         }
+
+        // The API may return topic names instead of UUIDs — resolve to IDs via the fetched list
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const topicIds = rawTopicIds
+          .map((raw) => UUID_RE.test(raw) ? raw : topicsList.find((t) => t.name.toLowerCase() === raw.toLowerCase())?.id ?? null)
+          .filter((id): id is string => id !== null);
+
         if (topicIds.length) {
           const subTopicsAction = await dispatch(fetchSubTopics(topicIds));
           if (fetchSubTopics.fulfilled.match(subTopicsAction)) subTopicsList = subTopicsAction.payload;
         }
+
+        const subTopicIds = rawSubTopicIds
+          .map((raw) => UUID_RE.test(raw) ? raw : subTopicsList.find((s) => s.name.toLowerCase() === raw.toLowerCase())?.id ?? null)
+          .filter((id): id is string => id !== null);
 
         // Keep testConfig fully in sync so the edit modal opens with all fields pre-filled
         dispatch(setTestConfig({

@@ -75,9 +75,7 @@ export const TestCreationForm: React.FC<Props> = ({ isModal, onSave, onCancel })
   // never flashes empty/default values before the API response arrives.
   const [fetchingTest, setFetchingTest] = useState(() => {
     const id = testId ?? (isModal ? savedTestId : null);
-    // In modal mode the data is already in Redux (loaded by QuestionCreationPage),
-    // so skip the loader; in standalone edit mode always start loading.
-    return !!id && !(isModal && !!testConfig.nameOfTest && !!testConfig.subject);
+    return !!id;
   });
   // Tracks the last test ID we fetched so the effect never runs twice for the same ID.
   const fetchedForIdRef          = useRef<string | null>(null);
@@ -115,27 +113,12 @@ export const TestCreationForm: React.FC<Props> = ({ isModal, onSave, onCancel })
   /* fetch subjects on mount */
   useEffect(() => { dispatch(fetchSubjects()); }, [dispatch]);
 
-  /* Modal mode: ensure topic/subtopic dropdowns are populated without resetting form values */
-  useEffect(() => {
-    if (!isModal || !testConfig.subject) return;
-    if (!topics.length) {
-      dispatch(fetchTopics(testConfig.subject)).then(() => {
-        if (testConfig.topic.length) dispatch(fetchSubTopics(testConfig.topic));
-      });
-    } else if (testConfig.topic.length && !subTopics.length) {
-      dispatch(fetchSubTopics(testConfig.topic));
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
-
   /* When editing an existing test → fetch it and pre-populate the form */
   useEffect(() => {
     const id = testId ?? (isModal ? savedTestId : null);
     if (!id) return;
-    // Skip if we already fetched for this ID (prevents double-fetch when savedTestId updates)
+    // Skip if we already fetched for this ID in this component instance
     if (fetchedForIdRef.current === id) return;
-    // In modal mode skip only when testConfig is already fully populated
-    if (isModal && testConfig.nameOfTest && testConfig.subject) return;
 
     fetchedForIdRef.current = id; // mark before async to block concurrent triggers
 

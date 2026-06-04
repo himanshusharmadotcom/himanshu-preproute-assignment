@@ -102,6 +102,21 @@ const DIFFICULTY_API_MAP: Record<string, string> = {
   'Difficult': 'hard',
 };
 
+const defaultPublishConfig: PublishConfig = {
+  publishType: 'Publish Now',
+  liveUntil: 'Custom Duration',
+  endDate: '', endTime: '',
+  scheduleDate: '', scheduleTime: '',
+};
+
+const loadPublishConfig = (): PublishConfig => {
+  try {
+    const saved = localStorage.getItem('prepRoute_publishConfig');
+    if (saved) return { ...defaultPublishConfig, ...(JSON.parse(saved) as PublishConfig) };
+  } catch { /* ignore */ }
+  return { ...defaultPublishConfig };
+};
+
 const defaultQuestion = (config?: Partial<TestConfig>): Question => ({
   id: crypto.randomUUID(),
   questionText: '',
@@ -119,12 +134,7 @@ const initialState: TestCreationState = {
   testConfig: defaultTestConfig,
   questions: Array.from({ length: 4 }, defaultQuestion),
   currentQuestionIndex: 0,
-  publishConfig: {
-    publishType: 'Publish Now',
-    liveUntil: 'Custom Duration',
-    endDate: '', endTime: '',
-    scheduleDate: '', scheduleTime: '',
-  },
+  publishConfig: loadPublishConfig(),
   isEditModalOpen: false,
   savedTestId: null,
   savedQuestionIds: [],
@@ -288,6 +298,8 @@ const testCreationSlice = createSlice({
       }
     },
     addQuestion(state) {
+      const max = parseInt(state.testConfig.noOfQuestions) || 0;
+      if (max > 0 && state.questions.length >= max) return;
       state.questions.push(defaultQuestion(state.testConfig));
     },
     deleteQuestion(state, action: PayloadAction<number>) {
@@ -303,6 +315,9 @@ const testCreationSlice = createSlice({
     },
     setPublishConfig(state, action: PayloadAction<Partial<PublishConfig>>) {
       state.publishConfig = { ...state.publishConfig, ...action.payload };
+      try {
+        localStorage.setItem('prepRoute_publishConfig', JSON.stringify(state.publishConfig));
+      } catch { /* ignore */ }
     },
     openEditModal(state) { state.isEditModalOpen = true; },
     closeEditModal(state) { state.isEditModalOpen = false; },
@@ -314,7 +329,8 @@ const testCreationSlice = createSlice({
       state.apiSuccess = null;
     },
     resetTest(_state) {
-      return { ...initialState };
+      try { localStorage.removeItem('prepRoute_publishConfig'); } catch { /* ignore */ }
+      return { ...initialState, publishConfig: { ...defaultPublishConfig } };
     },
   },
   extraReducers: (builder) => {
@@ -326,7 +342,9 @@ const testCreationSlice = createSlice({
         state.savedTestId = action.payload.id;
         state.step        = 'questions';
         state.apiSuccess  = 'Test created successfully';
-        state.questions   = state.questions.map(() => defaultQuestion(state.testConfig));
+        const max = parseInt(state.testConfig.noOfQuestions) || 0;
+        const initCount = max > 0 ? Math.min(max, 4) : 4;
+        state.questions = Array.from({ length: initCount }, () => defaultQuestion(state.testConfig));
       })
       .addCase(createTestAsync.rejected, (state, action) => {
         state.apiLoading = false;
